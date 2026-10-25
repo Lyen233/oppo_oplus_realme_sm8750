@@ -387,6 +387,9 @@ jobs:
           cd common
           wget https://github.com/$GITHUB_REPOSITORY/raw/refs/heads/$GITHUB_REF_NAME/other_patch/cve-2026-43499-rtmutex-6.6.patch
           patch -p1 -F 3 < cve-2026-43499-rtmutex-6.6.patch
+          # 修复 Ubuntu 26（新 glibc）下 libbpf 的 const-strchr 编译错误
+          sed -i "s/next_path = strchr(s, ':');/next_path = (char *)strchr(s, ':');/" tools/lib/bpf/libbpf.c
+          grep -q 'next_path = (char \*)strchr' tools/lib/bpf/libbpf.c || { echo 'libbpf 补丁未生效，源码可能有变化'; exit 1; }
           
       - name: 启用网络功能增强优化配置
         if: inputs.better_net
